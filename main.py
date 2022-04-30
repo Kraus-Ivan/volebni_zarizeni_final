@@ -21,6 +21,15 @@ def reset_promennych(): #resetuje promenne
     hlasy = []
     pocet_hlasu.fill(0)
 
+#protokol a fungovani programu#
+#   Klient odesila volbu, ta je v rozsahu 0 az 26 (A az Z).
+#   Server prijme volbu a s ni seriove cislo, ty ulozi do listu "hlas" ve formátu: hlas = [ser_cislo, value]
+#   Server nazpet posle take overeni, v nazvu je informace o prijmuti nebo neprijmuti volby ("ano"/"ne")
+#    a jako value je seriove cislo, ktere potom klient porovnava, jestli je jeho.
+#   Server nasledne uklada listy "hlas" do listu "hlasy", v listu "hlasy" nasledne vybere jen posledni List
+#    "hlas" od kazdeho klienta. 
+#   V listu "pocet_hlasu" pricte na dane pozici volby pocet vyskytu dane volby.
+
 def on_received_value(name, value):
     global stav, hlasy, hlasovani, vlastni_ser_cislo, rozsah
     ser_cislo = radio.received_packet(RadioPacketProperty.SERIAL_NUMBER)

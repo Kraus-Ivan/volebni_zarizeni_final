@@ -11,15 +11,20 @@ let hlasy : number[][] = []
 //  list hlasu se seriovymi cisly
 let pocet_hlasu : number[] = []
 //  list originalnich hlasu bez seriovych cisel
+let rozsah = 26
+// zvoleny rozsah moznosti
 basic.showString(String.fromCharCode(volba + 65))
-pocet_hlasu = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+for (let i = 0; i < rozsah; i++) {
+    pocet_hlasu.push(0)
+}
+// prida podle rozsahu moznosti a jejich pocet ( [0, 0, 0, 0...])
 function reset_promennych() {
     // resetuje promenne
     
     volba = 0
     hlasovani = false
     hlasy = []
-    let pocet_hlasu = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+    pocet_hlasu.fill(0)
 }
 
 radio.onReceivedValue(function on_received_value(name: string, value: number) {
@@ -45,7 +50,7 @@ radio.onReceivedValue(function on_received_value(name: string, value: number) {
         if (value == vlastni_ser_cislo) {
             // kdyz se shoduje prijmute ser. cislo s vlastnim ser. cislem
             basic.showIcon(IconNames.Yes)
-            basic.showString(String.fromCharCode(volba + 65), 25)
+            basic.showString(String.fromCharCode(volba + 65), rozsah - 1)
         }
         
     } else if (stav == 0 && name == "ne") {
@@ -53,7 +58,7 @@ radio.onReceivedValue(function on_received_value(name: string, value: number) {
         if (value == vlastni_ser_cislo) {
             // kdyz se shoduje prijmute ser. cislo s vlastnim ser. cislem
             basic.showIcon(IconNames.No)
-            basic.showString(String.fromCharCode(volba + 65), 25)
+            basic.showString(String.fromCharCode(volba + 65), rozsah - 1)
         }
         
     }
@@ -75,11 +80,11 @@ function vyhodnoceni_hlasu() {
     }
     // do listu pocet_hlasu uklada pocet originalnich hlasu od kazde moznosti
     let pozice_hlasu = 0
-    for (let i of pocet_hlasu) {
-        if (i > 0) {
+    for (let pocet of pocet_hlasu) {
+        if (pocet > 0) {
             basic.showString(String.fromCharCode(pozice_hlasu + 65))
             // zobrazi aspon jednoukrat objevenou moznost (A az Z)
-            basic.showNumber(i)
+            basic.showNumber(pocet)
         }
         
         // zobrazi od kazde objevene moznosti jeji pocet
@@ -89,7 +94,7 @@ function vyhodnoceni_hlasu() {
 }
 
 input.onLogoEvent(TouchButtonEvent.Pressed, function on_logo_event_pressed() {
-    // kdyz je stav nastaven na klienta, odesle volbu (0 az 25)
+    // kdyz je stav nastaven na klienta, odesle volbu
     
     if (stav == 0) {
         radio.sendValue("answer", volba)
@@ -103,7 +108,7 @@ basic.forever(function on_forever() {
         if (stav == 0) {
             //  kdyz je stav nastaven na klenta, zvysi volbu o 1
             volba += 1
-            volba = Math.constrain(volba, 0, 25)
+            volba = Math.constrain(volba, 0, rozsah - 1)
             basic.showString(String.fromCharCode(volba + 65), 40)
         } else {
             if (hlasovani) {
@@ -125,7 +130,7 @@ basic.forever(function on_forever() {
     if (input.buttonIsPressed(Button.B) && stav == 0) {
         //  kdyz je stav nastaven na klenta, snizi volbu o 1
         volba -= 1
-        volba = Math.constrain(volba, 0, 25)
+        volba = Math.constrain(volba, 0, rozsah - 1)
         basic.showString(String.fromCharCode(volba + 65), 40)
     }
     

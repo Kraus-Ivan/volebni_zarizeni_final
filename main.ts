@@ -45,7 +45,7 @@ radio.onReceivedValue(function on_received_value(name: string, value: number) {
         if (value == vlastni_ser_cislo) {
             // kdyz se shoduje prijmute ser. cislo s vlastnim ser. cislem
             basic.showIcon(IconNames.Yes)
-            basic.showString(String.fromCharCode(volba + 65))
+            basic.showString(String.fromCharCode(volba + 65), 25)
         }
         
     } else if (stav == 0 && name == "ne") {
@@ -53,7 +53,7 @@ radio.onReceivedValue(function on_received_value(name: string, value: number) {
         if (value == vlastni_ser_cislo) {
             // kdyz se shoduje prijmute ser. cislo s vlastnim ser. cislem
             basic.showIcon(IconNames.No)
-            basic.showString(String.fromCharCode(volba + 65))
+            basic.showString(String.fromCharCode(volba + 65), 25)
         }
         
     }
@@ -76,7 +76,6 @@ function vyhodnoceni_hlasu() {
     // do listu pocet_hlasu uklada pocet originalnich hlasu od kazde moznosti
     let pozice_hlasu = 0
     for (let i of pocet_hlasu) {
-        console.log(i)
         if (i > 0) {
             basic.showString(String.fromCharCode(pozice_hlasu + 65))
             // zobrazi aspon jednoukrat objevenou moznost (A az Z)

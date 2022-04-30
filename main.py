@@ -38,12 +38,12 @@ def on_received_value(name, value):
     elif stav == 0 and name == "ano": #kdyz je stav nastaven na klienta a potvrzene prijmuti
         if value == vlastni_ser_cislo: #kdyz se shoduje prijmute ser. cislo s vlastnim ser. cislem
             basic.show_icon(IconNames.YES)
-            basic.show_string(String.from_char_code(volba+65))
+            basic.show_string(String.from_char_code(volba+65), 25)
 
     elif stav == 0 and name == "ne": #kdyz je stav nastaven na klienta a potvrzene neprijmuti
         if value == vlastni_ser_cislo: #kdyz se shoduje prijmute ser. cislo s vlastnim ser. cislem
             basic.show_icon(IconNames.NO)
-            basic.show_string(String.from_char_code(volba+65))
+            basic.show_string(String.from_char_code(volba+65), 25)
 radio.on_received_value(on_received_value)
 
 
@@ -58,10 +58,7 @@ def vyhodnoceni_hlasu():
             pocet_hlasu[list_s_hlasem[1]] += 1 #do listu pocet_hlasu uklada pocet originalnich hlasu od kazde moznosti
     
     pozice_hlasu = 0
-
     for i in pocet_hlasu:
-        print(i)
-
         if i > 0:
             basic.show_string(String.from_char_code(pozice_hlasu+65)) #zobrazi aspon jednoukrat objevenou moznost (A az Z)
             basic.show_number(i) #zobrazi od kazde objevene moznosti jeji pocet

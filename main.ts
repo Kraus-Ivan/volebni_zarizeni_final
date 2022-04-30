@@ -12,14 +12,14 @@ let hlasy : number[][] = []
 let pocet_hlasu : number[] = []
 //  list originalnich hlasu bez seriovych cisel
 basic.showString(String.fromCharCode(volba + 65))
-pocet_hlasu = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+pocet_hlasu = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
 function reset_promennych() {
     // resetuje promenne
     
     volba = 0
     hlasovani = false
     hlasy = []
-    let pocet_hlasu = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+    let pocet_hlasu = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
 }
 
 radio.onReceivedValue(function on_received_value(name: string, value: number) {
@@ -99,12 +99,13 @@ input.onLogoEvent(TouchButtonEvent.Pressed, function on_logo_event_pressed() {
 })
 basic.forever(function on_forever() {
     
+    // volba = 0
     if (input.buttonIsPressed(Button.A)) {
         if (stav == 0) {
             //  kdyz je stav nastaven na klenta, zvysi volbu o 1
             volba += 1
             volba = Math.constrain(volba, 0, 25)
-            basic.showString(String.fromCharCode(volba + 65))
+            basic.showString(String.fromCharCode(volba + 65), 40)
         } else {
             if (hlasovani) {
                 // kdyz je stav nastaven na server a hlasovani je zapnute, vypne hlasovani
@@ -126,7 +127,7 @@ basic.forever(function on_forever() {
         //  kdyz je stav nastaven na klenta, snizi volbu o 1
         volba -= 1
         volba = Math.constrain(volba, 0, 25)
-        basic.showString(String.fromCharCode(volba + 65))
+        basic.showString(String.fromCharCode(volba + 65), 40)
     }
     
     if (input.pinIsPressed(TouchPin.P0)) {

@@ -10,14 +10,14 @@ pocet_hlasu: List[number] = [] # list originalnich hlasu bez seriovych cisel
 
 basic.show_string(String.from_char_code(volba+65))
 
-pocet_hlasu = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+pocet_hlasu = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
 
 def reset_promennych(): #resetuje promenne
     global stav, volba, hlasovani, hlasy
     volba = 0
     hlasovani = False
     hlasy = []
-    pocet_hlasu = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+    pocet_hlasu = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
 
 
 def on_received_value(name, value):
@@ -80,12 +80,12 @@ input.on_logo_event(TouchButtonEvent.PRESSED, on_logo_event_pressed)
 
 def on_forever():
     global volba, hlasovani, stav
-
+    #volba = 0
     if input.button_is_pressed(Button.A): 
         if stav == 0: # kdyz je stav nastaven na klenta, zvysi volbu o 1
             volba += 1
             volba = Math.constrain(volba, 0, 25)
-            basic.show_string(String.from_char_code(volba+65))
+            basic.show_string(String.from_char_code(volba+65), 40)
         else:
             if hlasovani: #kdyz je stav nastaven na server a hlasovani je zapnute, vypne hlasovani
                 hlasovani = False
@@ -99,7 +99,7 @@ def on_forever():
     if input.button_is_pressed(Button.B) and stav == 0: # kdyz je stav nastaven na klenta, snizi volbu o 1
         volba -= 1
         volba = Math.constrain(volba, 0, 25)
-        basic.show_string(String.from_char_code(volba+65))
+        basic.show_string(String.from_char_code(volba+65), 40)
 
     if input.pin_is_pressed(TouchPin.P0): #meni stav z klienta na server a naopak
         if stav == 0:

@@ -1,15 +1,17 @@
 radio.setGroup(58)
+radio.setTransmitSerialNumber(true)
+let vlastni_ser_cislo = control.deviceSerialNumber()
 let stav = 0
 //  stav 0 je klient, stav 1 je server
 let volba = 0
 //  volba klienta
 let hlasovani = false
 //  stav, jestli je zapnuto hlasovani od serveru
-let vlastni_ser_cislo = control.deviceSerialNumber()
 let hlasy : number[][] = []
-radio.setTransmitSerialNumber(true)
-basic.showString(String.fromCharCode(volba + 65))
+//  list hlasu se seriovymi cisly
 let pocet_hlasu : number[] = []
+//  list originalnich hlasu bez seriovych cisel
+basic.showString(String.fromCharCode(volba + 65))
 pocet_hlasu = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
 function reset_promennych() {
     // resetuje promenne
@@ -43,7 +45,7 @@ radio.onReceivedValue(function on_received_value(name: string, value: number) {
         if (value == vlastni_ser_cislo) {
             // kdyz se shoduje prijmute ser. cislo s vlastnim ser. cislem
             basic.showIcon(IconNames.Yes)
-            basic.clearScreen()
+            basic.showString(String.fromCharCode(volba + 65))
         }
         
     } else if (stav == 0 && name == "ne") {
@@ -51,7 +53,7 @@ radio.onReceivedValue(function on_received_value(name: string, value: number) {
         if (value == vlastni_ser_cislo) {
             // kdyz se shoduje prijmute ser. cislo s vlastnim ser. cislem
             basic.showIcon(IconNames.No)
-            basic.clearScreen()
+            basic.showString(String.fromCharCode(volba + 65))
         }
         
     }
@@ -60,26 +62,30 @@ radio.onReceivedValue(function on_received_value(name: string, value: number) {
 function vyhodnoceni_hlasu() {
     
     hlasy.reverse()
-    // reversne list s hlasy, aby zaznamenal jen ty posledni hlasy
+    // otoci list s hlasy, aby zaznamenal jen ty posledni hlasy
     let list_ser_cisel : number[] = []
-    //  list s dosud zaznamenanymi seriovymi cisly
+    // list s dosud zaznamenanymi seriovymi cisly
     for (let list_s_hlasem of hlasy) {
+        // projde hlasy a vybere jen ty posledni od kazdeho klienta (serioveho cisla)
         if (list_ser_cisel.indexOf(list_s_hlasem[0]) < 0) {
             list_ser_cisel.push(list_s_hlasem[0])
             pocet_hlasu[list_s_hlasem[1]] += 1
         }
         
     }
+    // do listu pocet_hlasu uklada pocet originalnich hlasu od kazde moznosti
     let pozice_hlasu = 0
     for (let i of pocet_hlasu) {
+        console.log(i)
         if (i > 0) {
             basic.showString(String.fromCharCode(pozice_hlasu + 65))
+            // zobrazi aspon jednoukrat objevenou moznost (A az Z)
             basic.showNumber(i)
         }
         
+        // zobrazi od kazde objevene moznosti jeji pocet
         pozice_hlasu += 1
     }
-    // print(pocet_hlasu)
     reset_promennych()
 }
 

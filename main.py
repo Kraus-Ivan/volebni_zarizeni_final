@@ -64,8 +64,7 @@ radio.on_received_string(on_received_string)
 
 
 def vyhodnoceni_hlasu():
-    global listshlasy
-    
+    global listshlasy, rozsah
     pocet = 0
     for moznost_hlasu in range(0, rozsah):
         for hlas in listshlasy:

@@ -4,114 +4,135 @@ vlastni_ser_cislo = control.device_serial_number()
 stav = 0 # stav 0 je klient, stav 1 je server
 volba = 0 # volba klienta
 hlasovani = False # stav, jestli je zapnuto hlasovani od serveru
-hlasy: List[List[number]] = [] # list hlasu se seriovymi cisly
-pocet_hlasu: List[number] = [] # list originalnich hlasu bez seriovych cisel
+
+list_s_hlasy = [{"ser_cislo" : 64646465, "volba" : 1}]
+list_s_hlasy.pop()
+
+basic.show_icon(IconNames.ASLEEP)
 
 rozsah = 26 #zvoleny rozsah moznosti
 
-basic.show_string(String.from_char_code(volba+65))
-
-for i in range(rozsah):
-    pocet_hlasu.append(0) #prida podle rozsahu moznosti a jejich pocet ( [0, 0, 0, 0...])
-
-def reset_promennych(): #resetuje promenne
-    global stav, volba, hlasovani, hlasy
+def reset_promennych():
+    global stav, volba, hlasovani, list_s_hlasy
     volba = 0
     hlasovani = False
-    hlasy = []
-    pocet_hlasu.fill(0)
+    list_s_hlasy = []
+    if stav == 0:
+        basic.show_icon(IconNames.ASLEEP)
+    list_ser_cisel: List[number] = []
+
 
 #protokol a fungovani programu#
 #   Klient odesila volbu, ta je v rozsahu 0 az 26 (A az Z).
 #   Server prijme volbu a s ni seriove cislo, ty ulozi do listu "hlas" ve formátu: hlas = [ser_cislo, value]
 #   Server nazpet posle take overeni, v nazvu je informace o prijmuti nebo neprijmuti volby ("ano"/"ne")
 #    a jako value je seriove cislo, ktere potom klient porovnava, jestli je jeho.
-#   Server nasledne uklada listy "hlas" do listu "hlasy", v listu "hlasy" nasledne vybere jen posledni List
+#   Server nasledne uklada listy "hlas" do listu "list_s_hlasy", v listu "list_s_hlasy" nasledne vybere jen posledni List
 #    "hlas" od kazdeho klienta. 
 #   V listu "pocet_hlasu" pricte na dane pozici volby pocet vyskytu dane volby.
 
+
 def on_received_value(name, value):
-    global stav, hlasy, hlasovani, vlastni_ser_cislo, rozsah
+    global stav, list_s_hlasy, hlasovani, vlastni_ser_cislo, rozsah
     ser_cislo = radio.received_packet(RadioPacketProperty.SERIAL_NUMBER)
 
     if stav == 1 and name == "answer" and hlasovani: # kdyz je stav nastaven na server a hlasovani je zapnuto
-        hlas = [ser_cislo, value] #zpracovani hlasu
-        hlasy.push(hlas) #pushnuti hlasu do listu s hlasy
+        counter = 0
+        nalez = False
+        for i in list_s_hlasy:
+            if i["ser_cislo"] == ser_cislo:
+                list_s_hlasy[counter]["volba"] = value
+                nalez = True
+            counter += 1
+        if nalez == False:
+            list_s_hlasy.push({"ser_cislo" : ser_cislo, "volba" : value}) #pushnuti hlasu do listu s hlasy
         radio.send_value("ano", ser_cislo) #posle potvrzeni o prijmuti (name = "ano")
         basic.show_icon(IconNames.HEART)
         basic.clear_screen()
-
-    elif stav == 1 and name == "answer": #kdyz je stav nastaven na server a hlasovani vypnuto
-        radio.send_value("ne", ser_cislo) #posle potvrzeni o neprijmuti (name = "ne")
-
-
     elif stav == 0 and name == "ano": #kdyz je stav nastaven na klienta a potvrzene prijmuti
         if value == vlastni_ser_cislo: #kdyz se shoduje prijmute ser. cislo s vlastnim ser. cislem
             basic.show_icon(IconNames.YES)
-            basic.show_string(String.from_char_code(volba+65), rozsah - 1)
-
-    elif stav == 0 and name == "ne": #kdyz je stav nastaven na klienta a potvrzene neprijmuti
-        if value == vlastni_ser_cislo: #kdyz se shoduje prijmute ser. cislo s vlastnim ser. cislem
-            basic.show_icon(IconNames.NO)
-            basic.show_string(String.from_char_code(volba+65), rozsah - 1)
+            if hlasovani:
+                basic.show_string(String.from_char_code(volba+65), rozsah - 1)
 radio.on_received_value(on_received_value)
 
 
+def on_received_string(receivedString):
+    global stav, hlasovani
+    if stav == 0 and receivedString == "stav": # klient pri prijmuti "stav", zmeni stav hlasovani
+        if hlasovani:
+            hlasovani = False
+            basic.show_icon(IconNames.ASLEEP)
+        else:
+            hlasovani = True
+            basic.show_string(String.from_char_code(volba+65), rozsah - 1)
+
+    elif stav == 0 and receivedString == "reset": # klient pri prijmuti "reset", vynuluje hlasovani
+        reset_promennych()
+radio.on_received_string(on_received_string)
+
+
 def vyhodnoceni_hlasu():
-    global hlasy, pocet_hlasu
-    hlasy.reverse() #otoci list s hlasy, aby zaznamenal jen ty posledni hlasy
-    list_ser_cisel: List[number] = [] #list s dosud zaznamenanymi seriovymi cisly
-
-    for list_s_hlasem in hlasy: #projde hlasy a vybere jen ty posledni od kazdeho klienta (serioveho cisla)
-        if list_s_hlasem[0] not in list_ser_cisel:
-            list_ser_cisel.push(list_s_hlasem[0])
-            pocet_hlasu[list_s_hlasem[1]] += 1 #do listu pocet_hlasu uklada pocet originalnich hlasu od kazde moznosti
+    global list_s_hlasy
     
-    pozice_hlasu = 0
-    for pocet in pocet_hlasu:
-        if pocet > 0:
-            basic.show_string(String.from_char_code(pozice_hlasu+65)) #zobrazi aspon jednoukrat objevenou moznost (A az Z)
-            basic.show_number(pocet) #zobrazi od kazde objevene moznosti jeji pocet
-        pozice_hlasu += 1
+    pocet = 0
+    for moznost_hlasu in range(0, rozsah):
+        for hlas in list_s_hlasy:
+            if hlas["volba"] == moznost_hlasu:
+                pocet += 1
+        basic.show_string(hlas)
+        basic.show_number(pocet)
+        basic.clear_screen()
 
-    reset_promennych()
 
-
-def on_logo_event_pressed(): #kdyz je stav nastaven na klienta, odesle volbu
+def on_logo_event_pressed():
     global stav, volba
-    if stav == 0: 
+    if stav == 0: # klient odesle volbu
         radio.send_value("answer", volba)
+    if stav == 1: # server vynuluje hlasovani
+        radio.send_string("reset")
+        reset_promennych()
 input.on_logo_event(TouchButtonEvent.PRESSED, on_logo_event_pressed)
 
 
 def on_forever():
     global volba, hlasovani, stav, rozsah
-    #volba = 0
+    # na zacatku: volba = 0
     if input.button_is_pressed(Button.A): 
-        if stav == 0: # kdyz je stav nastaven na klenta, zvysi volbu o 1
+        if stav == 0 and hlasovani: # klient zvysi volbu o 1
             volba += 1
             volba = Math.constrain(volba, 0, rozsah - 1)
-            basic.show_string(String.from_char_code(volba+65), 40)
-        else:
-            if hlasovani: #kdyz je stav nastaven na server a hlasovani je zapnute, vypne hlasovani
+            if hlasovani: # kvuli mozne rychle zmene hlasovani od server jeste jednou testuje klient stav hlasovani
+                basic.show_string(String.from_char_code(volba+65), 40)
+        elif stav == 1:
+            radio.send_string("stav") # odesila informaci o zmene stavu hlasovani
+            if hlasovani: # server vypne hlasovani, pokud je zaple
                 hlasovani = False
                 basic.show_icon(IconNames.NO)
-                vyhodnoceni_hlasu()
             else:
-                hlasovani = True #kdyz je stav nastaven na server a hlasovani vypnute, zapne hlasovani
+                hlasovani = True # jinak zapne server hlasovani
                 basic.show_icon(IconNames.YES)
             basic.clear_screen()
             
-    if input.button_is_pressed(Button.B) and stav == 0: # kdyz je stav nastaven na klenta, snizi volbu o 1
-        volba -= 1
-        volba = Math.constrain(volba, 0, rozsah - 1)
-        basic.show_string(String.from_char_code(volba+65), 40)
+    if input.button_is_pressed(Button.B):
+        if stav == 0: # klient snizi volbu o 1
+            volba -= 1
+            volba = Math.constrain(volba, 0, rozsah - 1)
+            if hlasovani: # kvuli mozne rychle zmene hlasovani od server jeste jednou testuje klient stav hlasovani
+                basic.show_string(String.from_char_code(volba+65), 40)
 
-    if input.pin_is_pressed(TouchPin.P0): #meni stav z klienta na server a naopak
+        elif stav == 1: # server vyhodnoti hlasovani
+            vyhodnoceni_hlasu()
+
+    if input.pin_is_pressed(TouchPin.P0): # zmena z klienta na server a naopak
         if stav == 0:
             stav = 1
         else:
             stav = 0
         basic.show_number(stav)
         basic.clear_screen()
+        if stav ==  0 and hlasovani == False:
+            basic.show_icon(IconNames.ASLEEP)
+        elif stav == 0 and hlasovani:
+            basic.show_string(String.from_char_code(volba+65), rozsah - 1)
 basic.forever(on_forever)

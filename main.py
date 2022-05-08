@@ -6,7 +6,7 @@ volba = 0 # volba klienta
 hlasovani = False # stav, jestli je zapnuto hlasovani od serveru
 
 listshlasy = [{"ser_cislo" : 64646465, "volba" : 1}]
-listshhlasy.pop()
+listshlasy.pop()
 
 basic.show_icon(IconNames.ASLEEP)
 

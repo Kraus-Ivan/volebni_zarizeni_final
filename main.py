@@ -5,46 +5,38 @@ stav = 0 # stav 0 je klient, stav 1 je server
 volba = 0 # volba klienta
 hlasovani = False # stav, jestli je zapnuto hlasovani od serveru
 
-list_s_hlasy = [{"ser_cislo" : 64646465, "volba" : 1}]
-list_s_hlasy.pop()
+listshlasy = [{"ser_cislo" : 64646465, "volba" : 1}]
+listshhlasy.pop()
 
 basic.show_icon(IconNames.ASLEEP)
 
 rozsah = 26 #zvoleny rozsah moznosti
 
 def reset_promennych():
-    global stav, volba, hlasovani, list_s_hlasy
+    global stav, volba, hlasovani, listshlasy
     volba = 0
     hlasovani = False
-    list_s_hlasy = []
+    listshlasy = []
     if stav == 0:
         basic.show_icon(IconNames.ASLEEP)
 
 
-#protokol a fungovani programu#
-#   Klient odesila volbu, ta je v rozsahu 0 az 26 (A az Z).
-#   Server prijme volbu a s ni seriove cislo, ty ulozi do listu "hlas" ve formátu: hlas = [ser_cislo, value]
-#   Server nazpet posle take overeni, v nazvu je informace o prijmuti nebo neprijmuti volby ("ano"/"ne")
-#    a jako value je seriove cislo, ktere potom klient porovnava, jestli je jeho.
-#   Server nasledne uklada listy "hlas" do listu "list_s_hlasy", v listu "list_s_hlasy" nasledne vybere jen posledni List
-#    "hlas" od kazdeho klienta. 
-#   V listu "pocet_hlasu" pricte na dane pozici volby pocet vyskytu dane volby.
 
 
 def on_received_value(name, value):
-    global stav, list_s_hlasy, hlasovani, vlastni_ser_cislo, rozsah
+    global stav, listshlasy, hlasovani, vlastni_ser_cislo, rozsah
     ser_cislo = radio.received_packet(RadioPacketProperty.SERIAL_NUMBER)
 
     if stav == 1 and name == "answer" and hlasovani: # kdyz je stav nastaven na server a hlasovani je zapnuto
         counter = 0
         nalez = False
-        for i in list_s_hlasy:
+        for i in listshlasy:
             if i["ser_cislo"] == ser_cislo:
-                list_s_hlasy[counter]["volba"] = value
+                listshlasy[counter]["volba"] = value
                 nalez = True
             counter += 1
         if nalez == False:
-            list_s_hlasy.push({"ser_cislo" : ser_cislo, "volba" : value}) #pushnuti hlasu do listu s hlasy
+            listshlasy.push({"ser_cislo" : ser_cislo, "volba" : value}) #pushnuti hlasu do listu s hlasy
         radio.send_value("ano", ser_cislo) #posle potvrzeni o prijmuti (name = "ano")
         basic.show_icon(IconNames.HEART)
         basic.clear_screen()
@@ -72,11 +64,11 @@ radio.on_received_string(on_received_string)
 
 
 def vyhodnoceni_hlasu():
-    global list_s_hlasy
+    global listshlasy
     
     pocet = 0
     for moznost_hlasu in range(0, rozsah):
-        for hlas in list_s_hlasy:
+        for hlas in listshlasy:
             if hlas["volba"] == moznost_hlasu:
                 pocet += 1
         basic.show_string(hlas)

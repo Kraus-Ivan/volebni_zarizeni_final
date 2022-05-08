@@ -19,7 +19,6 @@ def reset_promennych():
     list_s_hlasy = []
     if stav == 0:
         basic.show_icon(IconNames.ASLEEP)
-    list_ser_cisel: List[number] = []
 
 
 #protokol a fungovani programu#
@@ -84,7 +83,6 @@ def vyhodnoceni_hlasu():
         basic.show_number(pocet)
         basic.clear_screen()
 
-
 def on_logo_event_pressed():
     global stav, volba
     if stav == 0: # klient odesle volbu
@@ -93,7 +91,6 @@ def on_logo_event_pressed():
         radio.send_string("reset")
         reset_promennych()
 input.on_logo_event(TouchButtonEvent.PRESSED, on_logo_event_pressed)
-
 
 def on_forever():
     global volba, hlasovani, stav, rozsah
